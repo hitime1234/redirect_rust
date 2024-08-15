@@ -19,7 +19,8 @@ fn main() {
         println!("{:?}", stream.peer_addr());
         println!("Connection established!");          
         thread::spawn(|| { redirect(stream); });
-        
+    }
+    
 }
 
 
