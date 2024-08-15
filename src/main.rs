@@ -4,13 +4,31 @@ use std::{
     io::{BufRead, BufReader, Write, Read}, // Add Read trait
     net::{TcpListener, TcpStream},
     thread,
+    env,
 };
 
 
-fn main() {
+fn main() { 
     println!("Starting the server...");
+    let args: Vec<String> = env::args().collect();
     
-    let server = TcpListener::bind("0.0.0.0:8002").unwrap();
+    if args.len() > 1 {    
+        if args[1] == "-h" || args[1] == "--help" {
+            println!("Usage: {} <port>", args[0]);
+            return;
+        }
+    }
+    
+    let port = if args.len() > 1 {
+        &args[1]
+    } else {
+        println!("No port provided, using default port 8002");
+        "8002"
+    };  
+
+    
+    let server = TcpListener::bind(format!("0.0.0.0:{}",port)).unwrap();
+
     println!("Server started on {}", server.local_addr().unwrap().to_string().as_str());
     println!("Waiting for connections...\n\r\n\r");
     
@@ -20,14 +38,14 @@ fn main() {
         println!("Connection established!");          
         thread::spawn(|| { redirect(stream); });
     }
-    
+
+    return;
 }
 
 
 
 fn redirect(mut stream: TcpStream) {    
     let mut buffer = [0; 1024];
-    
     let mut reader = BufReader::new(stream.try_clone().unwrap());
     
     loop {
@@ -62,6 +80,8 @@ fn redirect(mut stream: TcpStream) {
         stream.flush().unwrap();
         stream.shutdown(std::net::Shutdown::Both).unwrap();
     }
+
+    return;
 }
 
 
